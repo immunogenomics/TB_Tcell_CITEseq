@@ -23,6 +23,7 @@ library(lme4)
 library(DESeq2)
 library(edgeR)
 
+## Adapted from the Harmony R package (Korsunsky, et al. Nat Methods 2018)
 cosine_normalize <- function(X, MARGIN = 1, do_safe = TRUE) {
     if (do_safe) {
         X <- sweep(X, MARGIN, apply(X, MARGIN, max), "/")
@@ -50,6 +51,7 @@ plot_shuffled_features <- function(ab, umap, exprs, pct = 0.95) {
       labs(title = ab))
 }
 
+## Adapted from the MASC R package (Fonseka, Rao, et al. Sci Trans Med 2017)
 MASC.me <- function(dataset, cluster, contrast, random_effects = NULL, fixed_effects = NULL,
                  verbose = FALSE, save_models = FALSE, save_model_dir = NULL, weights = NULL) {
 
@@ -150,6 +152,7 @@ MASC.me <- function(dataset, cluster, contrast, random_effects = NULL, fixed_eff
   }
 }
 
+## From Kamil Slowikowski (https://slowkow.com/notes/ggplot2-color-by-density/)
 get_density <- function(x, y, ...) {
     dens <- MASS::kde2d(x, y, ...)
     ix <- findInterval(x, dens$x)

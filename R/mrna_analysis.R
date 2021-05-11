@@ -1,9 +1,3 @@
-library(singlecellmethods)
-library(Matrix)
-library(irlba)
-library(harmony)
-library(uwot)
-library(dplyr)
 source("utils.R")
 
 meta_data <- read.table("../data/meta_data.txt", sep = "\t", header = T)
@@ -31,3 +25,6 @@ ids_ref <- data.frame(ids_ref)
 rm(snn_ref)
 gc()
 colnames(ids_ref) <- sprintf("res_%.2f", resolution_list)
+
+ids_ref_cca <- readRDS("../data/ids_ref_cca.rds")
+mutinformation(ids_ref_cca$res_2.00, ids_ref$res_2.00)
