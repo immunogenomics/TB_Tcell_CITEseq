@@ -1,5 +1,6 @@
 source("utils.R")
 
+# Load data
 adt_exprs_norm <- readRDS("../data/adt_exprs_norm.rds")
 meta_data <- read.table("../data/meta_data.txt", header = T, sep = "\t") # From GEO
 
@@ -24,7 +25,7 @@ cd4_idx[adt_exprs_norm["CD4.1",subset(meta_data, ab == 1)$cell_id] < 1.5 & adt_e
 meta_data$cd4 <- 0
 meta_data$cd4[meta_data$ab == 1] <- cd4_idx
 
-# Classification tree
+# Classification tree to identify top protein gates
 model <- rpart(cl ~ ., data = data.frame(t(adt_exprs_norm), cl = factor(meta_data$cluster_ids == "C-12")), cp = .000001)
 
 # Gate CCR6+

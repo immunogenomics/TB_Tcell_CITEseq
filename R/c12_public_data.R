@@ -1,9 +1,12 @@
 source("utils.R")
 
+# Load data
+
 meta_data <- read.table("../data/meta_data.txt", sep = "\t", header = T)
 ids_ref <- readRDS("../data/ids_ref.rds")
 
 # Bulk RNA-seq processing
+
 bulk_exprs <- read.csv("../data/bulk_exprs.csv", check.names = F)
 bulk_exprs <- bulk_exprs %>% group_by(hgnc_symbol) %>% summarise('M0022318-1' = sum(`M0022318-1`),
                                               'M0007191-1' = sum(`M0007191-1`),
@@ -63,7 +66,7 @@ berry1_data <- berry1_data[!duplicated(berry1_data$gene),]
 row.names(berry1_data) <- berry1_data$gene
 berry1_data <- berry1_data[,-c(1,ncol(berry1_data))]
 
-# Berry data processing (for Extended Data Figure 8d
+# Berry data processing (for Extended Data Figure 8d)
 
 berry2_meta <- fread("GSE19435_series_matrix.txt.gz", fill = T) # From GEO
 berry2_data <- berry2_meta[65:(nrow(berry2_meta)-1),]
@@ -103,6 +106,7 @@ keep_scriba <- scriba_meta[,14] != "group: Not a PP case" & scriba_meta[,10] == 
 scriba_meta <- scriba_meta[keep_scriba,]
 
 # Cross validation within CITE-seq T cell and bulk PBMC data
+
 i = 14
 lambdas <- 10^seq(5, -5, by = -.1)
 var_genes <- unlist(read.csv("../data/var_genes.csv"))
@@ -143,11 +147,15 @@ names(y_predicted_test_cv) <- names_cv
 cor(y_predicted_test_cv, c_prop_test_cv)
 
 # bulk PBMC correlation
+
 cor(y_predicted_test_cv[nchar(names(y_predicted_test_cv)) != 10], c_prop_test_cv[nchar(names(y_predicted_test_cv)) != 10])
+
 # single-cell T cell correlation
+
 cor(y_predicted_test_cv[nchar(names(y_predicted_test_cv)) == 10], c_prop_test_cv[nchar(names(y_predicted_test_cv)) == 10])
 
 # Extended Data Figure 8a
+
 options(repr.plot.height = 8, repr.plot.width = 8)
 ggplot(data.frame(y = y_predicted_test_cv,
                   x = c_prop_test_cv,
@@ -230,7 +238,6 @@ sum(perm_beta > 0.0031365)/10000
 # Extended Data Figure 8f
 
 ggplot(tmp_lmer_ea_bgi %>% filter(timept %in% c(540, 360)), aes(x = factor(-timept), y = X1, fill = status)) + 
-#    geom_boxplot(outlier.size = 0) + geom_point(position = position_jitterdodge()) +
     geom_boxplot() +
     xlab("") + ylab("Predicted C-12 proportion") +
     theme(axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 16), 
@@ -251,7 +258,6 @@ tmp_all_early <- data.frame(prop = c(tmp_lmer_ea_bgi[tmp_lmer_ea_bgi$timept %in%
                       status = c(gsub(".*: ", "", tmp_lmer_ea_bgi[tmp_lmer_ea_bgi$timept %in% c(360,540),][["status"]]), tolower(tmp_tbru[names(y_predicted_test_cv[row.names(tmp_tbru)]),"TB_STATUS"])))
 
 ggplot(tmp_all_early, aes(x = dataset, y = prop, fill = status)) + 
-#    geom_boxplot(outlier.size = 0) + geom_point(position = position_jitterdodge()) +
     geom_boxplot() +
     xlab("") + ylab("Predicted C-12 proportion") +
     theme(axis.text.y = element_text(size = 20), axis.text.x = element_text(size = 22), 
