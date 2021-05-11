@@ -1,18 +1,18 @@
-library(presto)
-library(DESeq2)
-library(edgeR)
+source("utils.R")
 
-meta_data <- readRDS("meta_data_01.12.rds")
-ids_ref <- readRDS("ids_ref_cca_01.12.rds")
+meta_data <- readRDS("../data/meta_data.rds")
+ids_ref <- readRDS("../data/ids_ref_cca.rds")
 
 meta_data$clus <- ids_ref$res_2.00
 meta_data <- meta_data[meta_data$clus %in% names(table(meta_data$clus))[table(meta_data$clus) > 5],]
 
-exprs_raw <- readRDS("exprs_raw_01.12.rds")
+# Make pseudobulk profiles
+exprs_raw <- readRDS("../data/exprs_raw.rds")
 all_collapse <- collapse_counts(exprs_raw, meta_data, c("clus", "donor", "batch"))
 rm(exprs_raw)
 gc()
 
+# Normalize pseudobulk expression
 cutoff <- 30
 drop <- which(apply(all_collapse$counts_mat, 1, max) < cutoff)
 d <- all_collapse$counts_mat[-drop,]
@@ -27,6 +27,7 @@ batch <- interaction(all_collapse$meta_data$batch)
 mm <- model.matrix(~0 + group + batch + donor + cell_umi)
 colnames(mm) <- gsub("-", ".", colnames(mm))
 
+# Diferential expression for one gene
 diffexp_lm <- function(gexp, gname, min_clus, max_clus, mm) {
     Reduce(rbind, lapply(min_clus:max_clus, function(x) {
         m <- lm(gexp~., data = data.frame(mm[,colnames(mm) == paste0("group", x) | !grepl("group", colnames(mm))]))
@@ -39,6 +40,7 @@ diffexp_lm <- function(gexp, gname, min_clus, max_clus, mm) {
     }))
 }
 
+# Run on batches of genes
 results <- Reduce(rbind, lapply(start:end, function(x) {
     diffexp_lm(tmp[x,], row.names(tmp)[x], 0, 30, mm)}
 ))

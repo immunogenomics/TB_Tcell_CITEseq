@@ -1,22 +1,15 @@
-library(singlecellmethods)
-library(Matrix)
-library(irlba)
-library(harmony)
-library(uwot)
-library(dplyr)
-library(parallel)
 source("utils.R")
 
-meta_data <- readRDS("meta_data_01.12.rds")
-exprs_raw <- readRDS("exprs_raw_01.12.rds")
+meta_data <- read.table("../data/meta_data.txt", sep = "\t", header = T) # From GEO
+exprs_raw <- readRDS("../data/exprs_raw.rds")
 
-exprs_norm <- exprs_raw[,meta_data$cell_id[meta_data$qc]] %>% singlecellmethods::normalizeData(method = "log")
+exprs_norm <- exprs_raw %>% singlecellmethods::normalizeData(method = "log")
 rm(exprs_raw);gc()
 var_genes <- FindVariableGenesBatch(exprs_norm, meta_data, "cell_id", "batch", 1000, 0.1) %>% with(unique(gene))
 exprs_scaled <- exprs_norm[var_genes, ] %>% singlecellmethods::scaleData()
 
-adt_exprs_raw <- readRDS("adt_exprs_raw_01.12.rds")
-adt_exprs_norm <- singlecellmethods::normalizeData(adt_exprs_raw[,meta_data$cell_id[meta_data$memTgate]], method = "cellCLR")
+adt_exprs_raw <- readRDS("../data/adt_exprs_raw.rds")
+adt_exprs_norm <- singlecellmethods::normalizeData(adt_exprs_raw, method = "cellCLR")
 rm(adt_exprs_raw);gc()
 var_prots <- row.names(adt_exprs_norm)[!row.names(adt_exprs_norm) %in% c("MouseIgG")]
 adt_exprs_scaled <- adt_exprs_norm[var_prots,] %>% singlecellmethods::scaleData()
